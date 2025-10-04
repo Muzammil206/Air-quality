@@ -183,6 +183,80 @@ export const ABUJA_LOCATIONS: LocationData[] = [
   },
 ]
 
+export const PORT_HARCOURT_LOCATIONS: LocationData[] = [
+  {
+    name: "Port Harcourt City",
+    district: "Port Harcourt",
+    type: "City Center",
+    coordinates: { lat: 4.8156, lng: 7.0498 },
+  },
+  {
+    name: "Rumuokoro",
+    district: "Obio-Akpor",
+    type: "Commercial Area",
+    coordinates: { lat: 4.8536, lng: 7.0106 },
+  },
+  {
+    name: "Trans-Amadi",
+    district: "Port Harcourt",
+    type: "Industrial Area",
+    coordinates: { lat: 4.8242, lng: 7.0256 },
+  },
+  {
+    name: "Rumuola",
+    district: "Port Harcourt",
+    type: "Residential",
+    coordinates: { lat: 4.8206, lng: 7.0417 },
+  },
+  {
+    name: "Aba Road",
+    district: "Port Harcourt",
+    type: "Commercial Hub",
+    coordinates: { lat: 4.8106, lng: 7.0125 },
+  }
+]
+
+export const LAGOS_LOCATIONS: LocationData[] = [
+  {
+    name: "Victoria Island",
+    district: "Lagos Island",
+    type: "Business District",
+    coordinates: { lat: 6.4281, lng: 3.4219 },
+  },
+  {
+    name: "Ikeja",
+    district: "Ikeja",
+    type: "Government District",
+    coordinates: { lat: 6.6059, lng: 3.3511 },
+  },
+  {
+    name: "Lekki",
+    district: "Eti-Osa",
+    type: "Residential",
+    coordinates: { lat: 6.4474, lng: 3.4899 },
+  },
+  {
+    name: "Apapa",
+    district: "Apapa",
+    type: "Industrial Area",
+    coordinates: { lat: 6.4484, lng: 3.3626 },
+  },
+  {
+    name: "Surulere",
+    district: "Surulere",
+    type: "Residential",
+    coordinates: { lat: 6.5010, lng: 3.3580 },
+  },
+  {
+    name: "Agege",
+    district: "Agege",
+    type: "Residential",
+    coordinates: { lat: 6.6239, lng: 3.3239 },
+  }
+]
+
+export const ALL_LOCATIONS = [...ABUJA_LOCATIONS, ...PORT_HARCOURT_LOCATIONS, ...LAGOS_LOCATIONS]
+
 export interface GeoJSONFeature {
   type: "Feature"
   geometry: {

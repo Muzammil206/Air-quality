@@ -2,12 +2,44 @@ import type { NextRequest } from "next/server"
 
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url)
+    // Enhanced URL parsing with validation
+    let requestUrl: URL
+    try {
+      requestUrl = new URL(req.url)
+    } catch (e) {
+      console.error("Invalid request URL:", req.url)
+      return new Response(JSON.stringify({ error: "Invalid request URL" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      })
+    }
+
+    const { searchParams } = requestUrl
     const lat = searchParams.get("lat")
     const lon = searchParams.get("lon")
     const apiKey = process.env.OPENWEATHER_API_KEY
 
-    console.log("API Request received:", { lat, lon, hasApiKey: !!apiKey })
+    console.log("API Request received:", { 
+      url: req.url,
+      parsedUrl: requestUrl.toString(),
+      lat, 
+      lon,
+      hasApiKey: !!apiKey 
+    })
+
+    // Validate coordinates
+    if (!lat || !lon || isNaN(Number(lat)) || isNaN(Number(lon))) {
+      console.error("Invalid coordinates:", { lat, lon })
+      return new Response(
+        JSON.stringify({ 
+          error: "Invalid coordinates",
+          details: `Received lat: ${lat}, lon: ${lon}`
+        }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      )
+    }
 
     if (!lat || !lon) {
       return new Response(JSON.stringify({ error: "Missing lat/lon parameters" }), {
@@ -24,10 +56,10 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    const url = `http://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${apiKey}`
-    console.log("Fetching from URL:", url.replace(apiKey, "***API_KEY***"))
+    const apiUrl = `http://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${apiKey}`
+    console.log("Fetching from URL:", apiUrl.replace(apiKey, "***API_KEY***"))
 
-    const response = await fetch(url, {
+    const response = await fetch(apiUrl, {
       headers: {
         "Content-Type": "application/json",
       },

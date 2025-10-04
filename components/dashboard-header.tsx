@@ -1,14 +1,20 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Bell, Share2, Maximize2, RefreshCw } from "lucide-react"
 import { useState } from "react"
 
-export function DashboardHeader() {
+interface DashboardHeaderProps {
+  onSearch: (address: string) => void
+}
+
+export function DashboardHeader({ onSearch }: DashboardHeaderProps) {
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [searchAddress, setSearchAddress] = useState("")
 
   const handleRefresh = () => {
     setIsRefreshing(true)
@@ -22,8 +28,23 @@ export function DashboardHeader() {
 
       <div className="flex-1 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <h1 className="text-lg font-semibold text-white">Abuja Air Quality Monitor</h1>
+          <h1 className="text-lg font-semibold text-white">Air Quality Monitor</h1>
           <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Live Data</Badge>
+        </div>
+
+        <div className="flex-1 max-w-md mx-4">
+          <Input
+            type="text"
+            value={searchAddress}
+            onChange={(e) => setSearchAddress(e.target.value)}
+            placeholder="Search locations in Nigeria..."
+            className="bg-gray-800 border-gray-700 text-white placeholder-gray-400"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && searchAddress.trim()) {
+                onSearch(searchAddress)
+              }
+            }}
+          />
         </div>
 
         <div className="flex items-center gap-2">

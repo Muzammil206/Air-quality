@@ -155,7 +155,7 @@ export function DashboardSidebar({
               AirSense
             </span>
             <div className="flex items-center gap-2 mt-1">
-              <div className="text-xs text-gray-400">Abuja Dashboard</div>
+              <div className="text-xs text-gray-400"> Dashboard</div>
               <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-xs px-2 py-0.5">Live</Badge>
             </div>
           </div>
@@ -165,7 +165,7 @@ export function DashboardSidebar({
       <SidebarContent className="p-6 space-y-8 overflow-y-auto bg-gray-900">
         {/* Location Search */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sm font-bold text-gray-200 mb-4">Abuja District</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sm font-bold text-gray-200 mb-4"> District</SidebarGroupLabel>
           <SidebarGroupContent>
             <div className="relative">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />

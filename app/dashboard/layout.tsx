@@ -1,6 +1,4 @@
 
-
-
 import type React from "react"
 import type { Metadata } from "next"
 import { GeistSans } from "geist/font/sans"
@@ -8,7 +6,8 @@ import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Suspense } from "react"
-import "./globals.css"
+import { SidebarNavigation } from "@/components/sidebar-navigation"
+
 
 export const metadata: Metadata = {
   title: "AirSense - Abuja Air Quality Dashboard",
@@ -44,7 +43,9 @@ html {
       <body>
         <Suspense fallback={null}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+            <SidebarNavigation>
             {children}
+            </SidebarNavigation>
           </ThemeProvider>
         </Suspense>
         <Analytics />

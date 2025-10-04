@@ -140,7 +140,9 @@ export async function fetchCurrentReading(
     }
 
     const coordinates = getLocationCoordinates(location)
-    const response = await fetch(`/api/air-quality?lat=${coordinates.lat}&lon=${coordinates.lng}`)
+    const apiPath = `api/air-quality?lat=${coordinates.lat}&lon=${coordinates.lng}`
+    const url = typeof window !== 'undefined' ? `${window.location.origin}/${apiPath}` : apiPath
+    const response = await fetch(url)
 
     if (!response.ok) {
       throw new Error(`Failed to fetch air quality data: ${response.statusText}`)
@@ -164,7 +166,9 @@ export async function fetchHistoricalData(
   const coordinates = getLocationCoordinates(location)
 
   try {
-    const response = await fetch(`/api/air-quality?lat=${coordinates.lat}&lon=${coordinates.lng}`)
+    const apiPath = `api/air-quality?lat=${coordinates.lat}&lon=${coordinates.lng}`
+    const url = typeof window !== 'undefined' ? `${window.location.origin}/${apiPath}` : apiPath
+    const response = await fetch(url)
     if (response.ok) {
       const apiResponse = await response.json()
       const currentReading = convertOpenWeatherToReading(apiResponse, location, gasType)
