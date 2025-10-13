@@ -1,7 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { type PropsWithChildren } from "react"
 import { cn } from "@/lib/utils"
+import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { LayoutDashboard, Map, Layers, BarChart3, Brain, FileText, Settings, User, ChevronLeft, ChevronRight } from "lucide-react"
 import Link from "next/link"
@@ -10,20 +12,16 @@ import Image from "next/image"
 const navigationItems = [
   {
     icon: LayoutDashboard,
-    label: "Dashboard",
+    label: "Dashboard Air Quality",
     href: "/dashboard",
     active: true,
   },
   {
     icon: Map,
-    label: "Map",
+    label: "Maps and field data",
     href: "/dashboard/map",
   },
-  {
-    icon: Layers,
-    label: "Layers",
-    href: "/dashboard/layers",
-  },
+ 
   {
     icon: BarChart3,
     label: "Calendar Map",
@@ -36,7 +34,7 @@ const navigationItems = [
   },
   {
     icon: FileText,
-    label: "Reports",
+    label: "Upload field data",
     href: "/dashboard/reports",
   },
   {
@@ -47,17 +45,29 @@ const navigationItems = [
 ]
 
 interface SidebarNavigationProps {
-  className?: string
+  className?: string;
 }
 
-export function SidebarNavigation({ className }: SidebarNavigationProps) {
+export function SidebarNavigation({ 
+  className, 
+  children 
+}: PropsWithChildren<SidebarNavigationProps>) {
+  const pathname = usePathname()
   const [activeItem, setActiveItem] = useState("Dashboard")
   const [isCollapsed, setIsCollapsed] = useState(false)
+
+  useEffect(() => {
+    // Automatically collapse sidebar on map page
+    if (pathname === "/dashboard/map") {
+      setIsCollapsed(true)
+    }
+  }, [pathname])
 
   const toggleCollapse = () => setIsCollapsed(!isCollapsed)
 
   return (
-    <div className={cn("h-screen bg-background border-r border-border flex flex-col transition-all duration-300", 
+
+    <aside className={cn("h-full bg-background border-r border-border flex flex-col transition-all duration-300", 
       isCollapsed ? "w-16" : "w-64", 
       className
     )}>
@@ -115,6 +125,6 @@ export function SidebarNavigation({ className }: SidebarNavigationProps) {
           )}
         </div>
       </div>
-    </div>
+    </aside>
   )
 }

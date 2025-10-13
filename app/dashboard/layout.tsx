@@ -40,12 +40,15 @@ html {
 }
         `}</style>
       </head>
-      <body>
+      <body className="flex h-screen overflow-hidden">
         <Suspense fallback={null}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-            <SidebarNavigation>
-            {children}
-            </SidebarNavigation>
+            <div className="flex w-full">
+              <SidebarNavigation />
+              <main className="flex-1 overflow-y-auto">
+                {children}
+              </main>
+            </div>
           </ThemeProvider>
         </Suspense>
         <Analytics />

@@ -1,9 +1,6 @@
 import React from 'react'
+import { ChatPage } from "@/components/chat-page"
 
-function page() {
-  return (
-    <div>coming soon</div>
-  )
+export default function Chat() {
+  return <ChatPage />
 }
-
-export default page

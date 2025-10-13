@@ -198,7 +198,7 @@ export default function CalendarPage() {
                 <Button
                   variant="default"
                   size="sm"
-                  className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground shadow-sm"
+                  className="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white border-cyan-500 hover:border-cyan-600"
                 >
                   <CalendarIcon className="w-4 h-4 mr-2" />
                   Calendar
