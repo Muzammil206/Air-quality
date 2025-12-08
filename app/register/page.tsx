@@ -29,11 +29,7 @@ const formSchema = z.object({
     .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
       message: "Password must contain at least one uppercase letter, one lowercase letter, and one number.",
     }),
-  role: z
-    .string({
-      required_error: "Please select a professional role.",
-    })
-    .min(1, { message: "Please select a professional role." }),
+  role: z.string().min(1, { message: "Please select a professional role." }),
 })
 
 const professionalRoles = [

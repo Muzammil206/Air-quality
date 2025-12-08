@@ -19,6 +19,14 @@ export interface AirQualityReading {
   trend: "up" | "down"
   changePercent: string
   healthRecommendation: string
+
+  // Per-gas component values (optional) - populated when available from the API
+  no2?: number
+  co?: number
+  o3?: number
+  pm25?: number
+  pm10?: number
+  so2?: number
 }
 
 export interface AirQualityStats {

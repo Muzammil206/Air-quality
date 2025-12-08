@@ -271,18 +271,21 @@ export default function MapPage() {
 
       if (activeMapView === "heatmap") {
         if (window.L && window.L.heatLayer) {
-          const maxValue = Math.max(
-            ...filteredData.features.map((feature) => {
-              const gasKey = filters.gasTypes[0] || "pm25_ugm3"
-              return feature.properties[gasKey as keyof typeof feature.properties] || 0
-            }),
-          )
+          const gasKey = filters.gasTypes[0] || "pm25_ugm3"
+
+          const values = filteredData.features.map((feature) => {
+            const raw = feature.properties[gasKey as keyof GeoJsonFeature["properties"]]
+            const num = typeof raw === "number" ? raw : Number(raw) || 0
+            return num
+          })
+
+          const maxValue = Math.max(...values, 0)
 
           const heatData = filteredData.features.map((feature) => {
             const { coordinates } = feature.geometry
-            const gasKey = filters.gasTypes[0] || "pm25_ugm3"
-            const value = feature.properties[gasKey as keyof typeof feature.properties] || 0
-            const intensity = Math.max(0.1, Math.min(value / maxValue, 1))
+            const raw = feature.properties[gasKey as keyof GeoJsonFeature["properties"]]
+            const value = typeof raw === "number" ? raw : Number(raw) || 0
+            const intensity = maxValue > 0 ? Math.max(0.1, Math.min(value / maxValue, 1)) : 0.1
 
             return [coordinates[1], coordinates[0], intensity]
           })

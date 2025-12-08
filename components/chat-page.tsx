@@ -70,6 +70,9 @@ export function ChatPage() {
     transport: new DefaultChatTransport({ api: "/api/chat" }),
   })
 
+  // Create a runtime-safe boolean for the in-progress state by stringifying status
+  const isInProgress = String(status) === "in_progress"
+
   useEffect(() => {
     console.log("[v0] Chat status:", status)
     if (error) {
@@ -90,7 +93,7 @@ export function ChatPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     console.log("[v0] Submit clicked, input:", inputValue)
-    if (inputValue.trim() && status !== "in_progress") {
+    if (inputValue.trim() && !isInProgress) {
       console.log("[v0] Sending message:", inputValue)
       sendMessage({ text: inputValue })
       setInputValue("")
@@ -99,7 +102,7 @@ export function ChatPage() {
 
   const handleSuggestedPrompt = (prompt: string) => {
     console.log("[v0] Suggested prompt clicked:", prompt)
-    if (status !== "in_progress") {
+    if (!isInProgress) {
       sendMessage({ text: prompt })
     }
   }
@@ -196,7 +199,7 @@ export function ChatPage() {
                 </div>
               ))}
 
-              {status === "in_progress" && (
+              {isInProgress && (
                 <div className="flex gap-3 justify-start">
                   <div className="flex items-start">
                     <div className="flex items-center justify-center w-8 h-8 rounded-full bg-cyan-500">
@@ -225,7 +228,7 @@ export function ChatPage() {
                   key={index}
                   variant="outline"
                   onClick={() => handleSuggestedPrompt(prompt)}
-                  disabled={status === "in_progress"}
+                  disabled={isInProgress}
                   className="bg-cyan-500 hover:bg-cyan-600 text-white border-cyan-500 hover:border-cyan-600"
                 >
                   {prompt}
@@ -239,20 +242,20 @@ export function ChatPage() {
         <div className="border-t bg-card">
           <div className="container px-4 py-4 mx-auto max-w-4xl">
             <form onSubmit={handleSubmit} className="flex gap-2">
-              <Button type="button" variant="ghost" size="icon" disabled={status === "in_progress"}>
+              <Button type="button" variant="ghost" size="icon" disabled={isInProgress}>
                 <Paperclip className="w-5 h-5" />
               </Button>
               <Input
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder="Type your message..."
-                disabled={status === "in_progress"}
+                disabled={isInProgress}
                 className="flex-1"
               />
               <Button
                 type="submit"
                 size="icon"
-                disabled={status === "in_progress" || !inputValue.trim()}
+                disabled={isInProgress || !inputValue.trim()}
                 className="bg-cyan-500 hover:bg-cyan-600 text-white border-cyan-500 hover:border-cyan-600"
               >
                 <Send className="w-5 h-5" />

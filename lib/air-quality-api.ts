@@ -35,10 +35,12 @@ function convertOpenWeatherToReading(
   apiResponse: any,
   location: string,
   gasType: keyof typeof GAS_TYPES,
+  overrideCoordinates?: { lat: number; lng: number },
 ): AirQualityReading {
   console.log("API Response:", JSON.stringify(apiResponse, null, 2))
 
-  let airQualityData, coordinates
+  let airQualityData: any
+  let coordinates: { lat: number; lon: number }
 
   if (apiResponse.type === "FeatureCollection" && apiResponse.features?.length > 0) {
     // Handle GeoJSON format
@@ -59,6 +61,11 @@ function convertOpenWeatherToReading(
   } else {
     console.error("Invalid API response structure:", apiResponse)
     throw new Error(`No air quality data available for ${location}. API response: ${JSON.stringify(apiResponse)}`)
+  }
+
+  // If caller provided override coordinates (e.g. custom point), prefer those
+  if (overrideCoordinates) {
+    coordinates = { lat: overrideCoordinates.lat, lon: overrideCoordinates.lng }
   }
 
   const { main, components, dt } = airQualityData
@@ -87,7 +94,12 @@ function convertOpenWeatherToReading(
   const healthIndex = main.aqi * 50 // Convert 1-5 scale to 0-250
   const qualityLevel = mapOpenWeatherAQIToQualityLevel(main.aqi, "")
 
-  const locationData = ABUJA_LOCATIONS.find((l) => l.name === location) || ABUJA_LOCATIONS[0]
+  // Find a matching location entry; if none exists (e.g. 'custom'), build a simple fallback
+  const locationData = ABUJA_LOCATIONS.find((l) => l.name === location) || {
+    district: "Custom",
+    coordinates: { lat: coordinates.lat, lng: coordinates.lon },
+    name: location,
+  }
 
   return {
     id: `${locationData.district}-${gasType}-${Date.now()}`,
@@ -103,6 +115,13 @@ function convertOpenWeatherToReading(
     gasType,
     concentration: Math.round(concentration * 10) / 10,
     unit: GAS_TYPES[gasType].unit, // This should now be safe after validation
+    // Per-pollutant values (normalized keys used by the UI)
+    no2: Math.round((componentMap.no2 || 0) * 10) / 10,
+    co: Math.round((componentMap.co || 0) * 10) / 10,
+    o3: Math.round((componentMap.o3 || 0) * 10) / 10,
+    pm25: Math.round((componentMap.pm2_5 || 0) * 10) / 10,
+    pm10: Math.round((componentMap.pm10 || 0) * 10) / 10,
+    so2: Math.round((componentMap.so2 || 0) * 10) / 10,
     healthIndex,
     qualityLevel,
     trend: Math.random() > 0.5 ? "up" : "down",
@@ -132,6 +151,7 @@ function getHealthRecommendation(qualityLevel: string): string {
 export async function fetchCurrentReading(
   location: string,
   gasType: keyof typeof GAS_TYPES = "no2", // Added default value for gasType
+  coords?: { lat: number; lng: number },
 ): Promise<AirQualityReading> {
   try {
     if (!gasType || !GAS_TYPES[gasType]) {
@@ -139,8 +159,9 @@ export async function fetchCurrentReading(
       gasType = "no2"
     }
 
-    const coordinates = getLocationCoordinates(location)
-    const apiPath = `api/air-quality?lat=${coordinates.lat}&lon=${coordinates.lng}`
+    // Use provided coordinates if available (for custom points), otherwise look up by location
+    const coordinatesForApi = coords ? coords : getLocationCoordinates(location)
+    const apiPath = `api/air-quality?lat=${coordinatesForApi.lat}&lon=${coordinatesForApi.lng}`
     const url = typeof window !== 'undefined' ? `${window.location.origin}/${apiPath}` : apiPath
     const response = await fetch(url)
 
@@ -149,7 +170,7 @@ export async function fetchCurrentReading(
     }
 
     const apiResponse = await response.json()
-    return convertOpenWeatherToReading(apiResponse, location, gasType)
+    return convertOpenWeatherToReading(apiResponse, location, gasType, coords)
   } catch (error) {
     console.error("Error in fetchCurrentReading:", error)
     throw error

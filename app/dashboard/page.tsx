@@ -3,7 +3,14 @@
 import { useState } from "react"
 import { SidebarNavigation } from "@/components/sidebar-navigation"
 import { TopNavigation } from "@/components/top-navigation"
-import { MapSection } from "@/components/map-section"
+import dynamic from "next/dynamic"
+
+// Load MapSection only on the client to avoid server-side window/leaflet imports
+const MapSection = dynamic(
+  () => import("@/components/map-section").then((mod) => mod.MapSection),
+  { ssr: false }
+)
+
 import { PollutantCharts } from "@/components/pollutant-charts"
 import { AIInsights } from "@/components/ai-insights"
 import { PollutantControls } from "@/components/pollutant-controls"
@@ -66,7 +73,7 @@ export default function DashboardPage() {
           </div>
 
                     <div className="w-[400px] bg-white dark:bg-gray-900 border-l border-border flex flex-col shadow-xl">
-            <Tabs defaultValue="insights" className="h-full flex flex-col">
+            <Tabs defaultValue="charts" className="h-full flex flex-col">
               <div className="border-b border-border px-4">
                 <TabsList className="w-full">
                   <TabsTrigger value="insights" className="flex-1">AI Insights</TabsTrigger>

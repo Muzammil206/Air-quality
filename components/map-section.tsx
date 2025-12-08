@@ -92,6 +92,21 @@ function MapStyleController({ viewMode }: { viewMode: "real-time" | "layers" | "
   return null
 }
 
+// Register map click events using react-leaflet hooks (avoids unsupported MapContainer props)
+function MapClickHandler({ onClick }: { onClick: (e: L.LeafletMouseEvent) => void }) {
+  const map = useMap()
+
+  useEffect(() => {
+    const handler = (e: L.LeafletMouseEvent) => onClick(e)
+    map.on("click", handler)
+    return () => {
+      map.off("click", handler)
+    }
+  }, [map, onClick])
+
+  return null
+}
+
 function AirQualityMarker({
   station,
   selectedGas,
@@ -302,16 +317,18 @@ export function MapSection({
         id: "custom-marker-" + Date.now(),
         name: "Custom Location",
         type: "Selected Point",
-        coordinates: [lat, lng],
+        // ensure tuple type for coordinates
+        coordinates: [lat, lng] as [number, number],
         aqi: Math.round(reading.healthIndex),
         level,
         color,
-        no2: reading.no2,
-        pm25: reading.pm25,
-        o3: reading.o3,
-        co: reading.co,
-        so2: reading.so2,
-        pm10: reading.pm10,
+        // provide numeric fallbacks when API fields are optional
+        no2: reading.no2 ?? 0,
+        pm25: reading.pm25 ?? 0,
+        o3: reading.o3 ?? 0,
+        co: reading.co ?? 0,
+        so2: reading.so2 ?? 0,
+        pm10: reading.pm10 ?? 0,
         error: false,
       }
 
@@ -544,13 +561,9 @@ export function MapSection({
             zoom={11}
             style={{ height: "100%", width: "100%" }}
             className="z-0"
-            eventHandlers={{
-              click: (e) => {
-                handleMapClick(e)
-              },
-            }}
           >
             <MapStyleController viewMode={viewMode} />
+            <MapClickHandler onClick={handleMapClick} />
             {!dataLoading && (
               <>
                 {districtsData.map((station) => (
