@@ -138,7 +138,7 @@ export default function AirQualityPlatform() {
                 </Link>
               </Button>
               <Button className="aqmp-bg-primary aqmp-bg-primary-hover text-white font-semibold px-6 xl:px-8 py-2.5 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
-                <Link href="/signup">
+                <Link href="/register">
                 Sign Up Free
                 </Link>
               </Button>
