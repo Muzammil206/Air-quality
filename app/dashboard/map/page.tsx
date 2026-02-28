@@ -272,7 +272,7 @@ export default function MapPage() {
       if (activeMapView === "heatmap") {
         if (window.L && window.L.heatLayer) {
           const gasKey = filters.gasTypes[0] || "pm25_ugm3"
-
+          
           const values = filteredData.features.map((feature) => {
             const raw = feature.properties[gasKey as keyof GeoJsonFeature["properties"]]
             const num = typeof raw === "number" ? raw : Number(raw) || 0

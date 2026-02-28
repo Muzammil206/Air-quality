@@ -352,7 +352,7 @@ export function ChatPage() {
           </div>
 
           <p className="text-center text-[10px] text-gray-400 mt-2">
-            Powered by live OpenWeather data · US EPA AQI standard
+            Powered by data collected from the field & satellite data 
           </p>
         </div>
       </div>

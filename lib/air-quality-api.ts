@@ -115,13 +115,6 @@ function convertOpenWeatherToReading(
     gasType,
     concentration: Math.round(concentration * 10) / 10,
     unit: GAS_TYPES[gasType].unit, // This should now be safe after validation
-    // Per-pollutant values (normalized keys used by the UI)
-    no2: Math.round((componentMap.no2 || 0) * 10) / 10,
-    co: Math.round((componentMap.co || 0) * 10) / 10,
-    o3: Math.round((componentMap.o3 || 0) * 10) / 10,
-    pm25: Math.round((componentMap.pm2_5 || 0) * 10) / 10,
-    pm10: Math.round((componentMap.pm10 || 0) * 10) / 10,
-    so2: Math.round((componentMap.so2 || 0) * 10) / 10,
     healthIndex,
     qualityLevel,
     trend: Math.random() > 0.5 ? "up" : "down",
