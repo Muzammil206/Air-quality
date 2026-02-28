@@ -1,117 +1,85 @@
-"use server"
+// lib/ai-insights.ts
+// Reusable client for the /api/insights endpoint.
+// Works in both Next.js (web) and React Native / Expo (mobile) — just pass the correct baseUrl.
 
-import type { GAS_TYPES, AirQualityReading } from "@/lib/types"
-import { fetchCurrentReading } from "@/lib/air-quality-api"
+import { fr } from "date-fns/locale"
+import type { InsightRequest, InsightsResponse } from "@/app/api/insights/route"
 
-interface GeoJSONAirQualityResponse {
-  type: string
-  features: Array<{
-    type: string
-    geometry: {
-      type: string
-      coordinates: [number, number]
-    }
-    properties: {
-      air_quality_index: number
-      aqi_description: string
-      components: Record<string, number>
-      timestamp: number
-      location: {
-        lat: number
-        lon: number
-      }
-    }
-  }>
+export type { InsightRequest, InsightsResponse }
+
+interface FetchInsightsOptions {
+  /**
+   * Override the base URL — required for React Native / Expo since
+   * relative URLs don't work outside a browser.
+   * Web: leave undefined (defaults to "/api/insights")
+   * Mobile: pass your deployed URL e.g. "https://your-app.vercel.app"
+   */
+  baseUrl?: string
+  /** Abort signal for request cancellation */
+  signal?: AbortSignal
 }
 
-export async function generateAIInsights(
+/**
+ * Fetch AI-generated insights for a given air quality reading.
+ *
+ * @example — Web (Next.js)
+ * const data = await fetchAIInsights({ location: "Abuja", gasType: "pm2_5", aqi: 75, components: { pm2_5: 20 } })
+ *
+ * @example — Mobile (React Native / Expo)
+ * const data = await fetchAIInsights(
+ *   { location: "Lagos", gasType: "no2", aqi: 120, components: { no2: 45 }, platform: "mobile" },
+ *   { baseUrl: "https://your-app.vercel.app" }
+ * )
+ */
+export async function fetchAIInsights(
+  payload: InsightRequest,
+  options: FetchInsightsOptions = {}
+): Promise<InsightsResponse> {
+  const { baseUrl = "", signal } = options
+  const url = `${baseUrl}/api/insights`
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    signal,
+  })
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: "Unknown error" }))
+    throw new Error(err.error ?? `Insights API error: ${res.status}`)
+  }
+
+  return res.json() as Promise<InsightsResponse>
+}
+
+// ─── Convenience helpers ──────────────────────────────────────────────────────
+
+/**
+ * Build an InsightRequest from a raw GeoJSON air quality API response.
+ * Matches the shape returned by your /api/air-quality route.
+ */
+export function buildInsightRequest(
   location: string,
-  gasType: keyof typeof GAS_TYPES,
-  apiResponse: GeoJSONAirQualityResponse,
-) {
-  try {
-    // Validate the entire response structure
-    if (!apiResponse || 
-        !apiResponse.type || 
-        !apiResponse.features || 
-        !Array.isArray(apiResponse.features) || 
-        apiResponse.features.length === 0 ||
-        !apiResponse.features[0].properties ||
-        !apiResponse.features[0].properties.components ||
-        !apiResponse.features[0].properties.air_quality_index ||
-        !apiResponse.features[0].properties.location
-    ) {
-      console.error('Invalid API response structure:', apiResponse)
-      throw new Error("Invalid air quality data format. Missing required fields.")
-    }
-    
-    const { properties } = apiResponse.features[0]
-    const { components, air_quality_index, timestamp } = properties
-
-    const prompt = `
-      Based on the following air quality data for ${location}, provide comprehensive analysis and actionable recommendations for ${gasType} levels.
-
-      AQI: ${air_quality_index} (${properties.aqi_description})
-      Components: ${JSON.stringify(components, null, 2)}
-      Location: ${location}
-      Coordinates: ${properties.location.lat}, ${properties.location.lon}
-      Timestamp: ${new Date(timestamp * 1000).toISOString()}
-
-      Please structure your response as a JSON array of objects, each with: title, description, severity (low|medium|high), timestamp (ISO), and recommendations (array of strings).
-
-      The first object should be the main summary with detailed analysis, others can be specific insights about health impacts, trends, and precautions.
-
-      Focus on practical advice for residents and highlight any concerning patterns or positive trends.
-    `
-
-    const payload = {
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-    }
-
-    const apiKey = process.env.GEMINI_API_KEY
-    if (!apiKey) {
-      throw new Error("Gemini API key not configured")
-    }
-
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`
-
-    const response = await fetch(apiUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    })
-
-    if (!response.ok) {
-      throw new Error(`API call failed with status: ${response.status}`)
-    }
-
-    const result = await response.json()
-    const text = result?.candidates?.[0]?.content?.parts?.[0]?.text
-
-    let parsed = []
-    if (text) {
-      try {
-        parsed = JSON.parse(text)
-      } catch (e) {
-        const match = text.match(/\[[\s\S]*\]/)
-        if (match) parsed = JSON.parse(match[0])
+  gasType: string,
+  apiResponse: {
+    features: Array<{
+      properties: {
+        air_quality_index: number
+        components: Record<string, number>
+        timestamp: number
       }
-    }
-
-    if (parsed && Array.isArray(parsed) && parsed.length > 0) {
-      return { 
-        success: true, 
-        data: parsed, 
-        airQualityData: {
-          ...apiResponse,
-          components: properties.components,
-          aqi: properties.air_quality_index
-        }
-      }
-    } else {
-      throw new Error("No valid insights found in the API response.")
-    }
-  } catch (error: any) {
-    return { success: false, error: error.message || "Failed to generate insights" }
+    }>
+  },
+  platform: "web" | "mobile" = "web"
+): InsightRequest {
+  const props = apiResponse.features[0].properties
+  return {
+    location,
+    gasType,
+    aqi: props.air_quality_index,
+    components: props.components,
+    timestamp: props.timestamp,
+    platform,
   }
 }

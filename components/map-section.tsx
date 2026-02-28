@@ -843,9 +843,7 @@ export function MapSection({
                     </span>
                   )}
                 </div>
-                <p className="text-xs" style={{ color: D.muted }}>
-                  US EPA AQI · OpenWeather Air Pollution API
-                </p>
+                
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -1070,7 +1068,7 @@ export function MapSection({
                 </span>
               </div>
               <p className="text-xs mb-3" style={{ color: D.muted }}>
-                Daily shape scaled from live reading of {pm25.toFixed(1)} μg/m³. OpenWeather free tier has no historical endpoint.
+                Daily shape scaled from live reading of {pm25.toFixed(1)} μg/m³.  free tier has no historical endpoint.
               </p>
               <div className="rounded-2xl p-4 border shadow-sm" style={{ background: D.card, borderColor: D.border }}>
                 <ResponsiveContainer width="100%" height={130}>
