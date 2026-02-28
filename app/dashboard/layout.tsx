@@ -30,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <>
       <head>
         <style>{`
 html {
@@ -40,7 +40,7 @@ html {
 }
         `}</style>
       </head>
-      <body className="flex h-screen overflow-hidden">
+      <div className="flex h-screen overflow-hidden">
         <Suspense fallback={null}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             <div className="flex w-full">
@@ -52,8 +52,8 @@ html {
           </ThemeProvider>
         </Suspense>
         <Analytics />
-      </body>
-    </html>
+      </div>
+    </>
   )
 }
 
